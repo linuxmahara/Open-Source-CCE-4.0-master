@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<br />
+<div class="jumbotron">
+{% if block.Status == 'ok' %}
+    &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+
+    <br />
+    <h2>Block Height: <font style="color:maroon;"> {{ block.blk[0] }}</font></h2>
+
+   </div>
+ <div class="container-fluid">
+
+    Height: {{ block.blk[0] }} <br><br>
+    Hash: {{ block.blk[1] }} <br><br>
+    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br><br>
+    Difficulty: {{ block.blk[5] | normalize }} (Bits: {{ block.blk[4] }}) <br><br>
+    Transactions: {{ block.blk[11] }} <br><br>
+    Total Sent: {{ block.blk[12] | normalize }} <br><br>
+    Size: {{ block.blk[6] }} kilobytes<br><br>
+    Merkle Root: {{ block.blk[8] }} <br><br>
+    Nonce: {{block.blk[3] }} <br><br>
+
+</div>
+{% if block.transactions %}
+<div class="container-fluid">
+<br /> <h2> Transactions</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Transaction Hash(TXID)</th>
+            <th>Input Address : Amount</th>
+            <th>Output Address : Amount</th>
+             </thead>
+     <tbody>
+
+    {% for tx in block.transactions.iteritems() %}
+    <tr><td><a href="/transaction?transaction={{ tx[0] }}">{{ tx[0] }}</a></td><td>
+        {% for address,value in tx[1].txin.iteritems() %}
+            {% if address == "POW Generation" or address == "Proof of Stake" %}
+                {{ address }}
+                    {% if value > 0 %}
+                         : {{ value |normalize }}
+                    {% endif %}
+            {% else %}
+            <a href="/address?address={{ address }}">{{ address }}</a> : {{ value | normalize }} <br>
+            {% endif %}
+        {% endfor %}
+        </td><td>
+        {% for address,value in tx[1].txout.iteritems() %}
+            {% if value == 0 %}
+                {{ address }}
+            {% else %}
+                <a href="/address?address={{ address }}">{{ address }}</a>  : {{ value | normalize }} <br>
+            {% endif %}
+        {% endfor %}
+        </td></tr>
+    {% endfor %}
+    </tbody>
+
+
+
+</table>
+</div>
+{% endif %}
+{% else %}
+<br /><h1 style="text-align:center;">Block was not found.</h1></div>
+
+
+{% endif %}
+
+{% endblock %}
